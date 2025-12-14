@@ -130,12 +130,28 @@
             font-size: 1.4em; 
         }
 
-        /* Thêm style riêng cho lỗi anime */
+        /* Style cho lỗi anime */
         .result-anime {
             background-color: #1E90FF; /* Xanh dương cho Anime */
             color: #fff;
             border: 2px solid #104e8b;
             font-size: 1.3em;
+        }
+        
+        /* Style cho lỗi IShowSpeed */
+        .result-speed {
+            background-color: #FF8C00; /* Màu cam đậm */
+            color: #fff;
+            border: 2px solid #cc7000;
+            font-size: 1.4em;
+        }
+        
+        /* Style MỚI cho 36 */
+        .result-36 {
+            background-color: #32CD32; /* Màu xanh lá chanh */
+            color: #fff;
+            border: 2px solid #1e831e;
+            font-size: 1.5em;
         }
 
     </style>
@@ -167,7 +183,7 @@
         const imageUrl = 'https://th.bing.com/th/id/R.a339894d35b503f63cfc60b38a44c404?rik=6PllGXQIzb9g6g&pid=ImgRaw&r=0';
         const laughAudio = document.getElementById('laugh-sound');
 
-        // DANH SÁCH TÊN ANIME ĐÃ ĐƯỢC MỞ RỘNG
+        // DANH SÁCH TÊN ANIME CẦN KIỂM TRA
         const animeNames = [
             'gojo', 'satoru', 'nobara', 'deku', 'midoriya', 'izuku', 'bakugo', 'katsuki', 'todoroki', 
             'shoto', 'luffy', 'zoro', 'nami', 'sanji', 'levi', 'eren', 'mikasa', 
@@ -181,7 +197,7 @@
         function checkCrush() {
             const crushName = document.getElementById('crush-name').value.trim();
             const resultDiv = document.getElementById('result');
-            // Chuyển thành chữ thường, loại bỏ khoảng trắng và dấu (tùy chọn) để so sánh dễ hơn
+            // Chuyển thành chữ thường, loại bỏ khoảng trắng và dấu để so sánh dễ hơn
             const normalizedName = crushName.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/\s/g, ''); 
 
             // 1. Kiểm tra điền tên
@@ -194,34 +210,59 @@
                 return;
             }
 
-            // 2. KIỂM TRA TÊN ANIME
-            if (animeNames.includes(normalizedName)) {
-                // Hiển thị thông báo anime với emoji an ủi
-                const animeErrorDiv = document.createElement('div');
-                animeErrorDiv.className = 'result-anime result-text';
-                animeErrorDiv.innerHTML = `😇 Mày thực sự crush một đứa không có thật à? 😇`;
+            // Xóa mọi thứ cũ
+            resultDiv.innerHTML = ''; 
+            resultDiv.className = '';
+
+            let specialMessage = null; // Biến để lưu thông báo đặc biệt
+
+            // 2. KIỂM TRA CÁC TRƯỜNG HỢP ĐẶC BIỆT THEO THỨ TỰ ƯU TIÊN
+
+            // Ưu tiên 1: Mã 36
+            if (normalizedName === '36') {
+                specialMessage = {
+                    text: 'tôi ăn rau má tôi ăn nem chua tôi đi phá đường tàu!!!',
+                    class: 'result-36'
+                };
+            }
+            // Ưu tiên 2: Ishowspeed
+            else if (normalizedName === 'ishowspeed') {
+                specialMessage = {
+                    text: '😭 my mom is kinda home less 😭',
+                    class: 'result-speed'
+                };
+            }
+            // Ưu tiên 3: Tên Anime
+            else if (animeNames.includes(normalizedName)) {
+                specialMessage = {
+                    text: '😇 Mày thực sự crush một đứa không có thật à? 😇',
+                    class: 'result-anime'
+                };
+            }
+
+            // 3. HIỂN THỊ THÔNG BÁO ĐẶC BIỆT (nếu có)
+            if (specialMessage) {
+                // Hiển thị thông báo đặc biệt
+                const specialDiv = document.createElement('div');
+                specialDiv.className = specialMessage.class + ' result-text';
+                specialDiv.innerHTML = specialMessage.text;
                 
-                resultDiv.innerHTML = '';
-                resultDiv.appendChild(animeErrorDiv);
+                resultDiv.appendChild(specialDiv);
                 
-                // Phát âm thanh khi có lỗi anime
+                // Phát âm thanh tiếng cười
                 laughAudio.currentTime = 0; 
                 laughAudio.play().catch(error => { console.log("Lỗi phát âm thanh."); });
-                return; // Ngừng thực hiện các bước tiếp theo
+                return; // Ngừng thực hiện logic bình thường
             }
 
 
-            // 3. THỰC HIỆN LOGIC BÌNH THƯỜNG (nếu tên không phải anime)
+            // 4. THỰC HIỆN LOGIC BÌNH THƯỜNG
 
             // Phát âm thanh tiếng cười
             laughAudio.currentTime = 0; 
             laughAudio.play().catch(error => {
                 console.log("Không thể phát âm thanh. Hãy kiểm tra Live Server và đường dẫn tệp.");
             });
-
-            // Xóa mọi thứ cũ
-            resultDiv.innerHTML = ''; 
-            resultDiv.className = '';
             
             // TẠO VÀ CHÈN ẢNH 
             const imageElement = document.createElement('img');
@@ -234,25 +275,23 @@
             
             resultDiv.appendChild(imageElement);
 
-            // 4. Thuật toán 1%
+            // Thuật toán 1%
             const isMatch = Math.random() < 0.01;
             let resultText = '';
             let resultClass = '';
 
             if (isMatch) {
                 resultClass = 'result-yes';
-                // Đã xóa emoji và in đậm
                 resultText = `CÓ RỒI! ${crushName} có thể cũng thích bạn đó! (Tỷ lệ 1% đã trúng!)`;
             } else {
                 resultClass = 'result-no';
-                // Đã xóa in đậm
                 resultText = `mày nghĩ cô/anh ấy yêu mày thật à?`;
             }
 
             // Hiển thị kết quả text
             const textResultDiv = document.createElement('div');
             textResultDiv.className = resultClass + ' result-text';
-            textResultDiv.innerHTML = resultText;
+            textResultDiv.innerHTML = textResultDiv.innerHTML = resultText;
             
             resultDiv.appendChild(textResultDiv);
         }
