@@ -130,6 +130,14 @@
             font-size: 1.4em; 
         }
 
+        /* Thêm style riêng cho lỗi anime */
+        .result-anime {
+            background-color: #1E90FF; /* Xanh dương cho Anime */
+            color: #fff;
+            border: 2px solid #104e8b;
+            font-size: 1.3em;
+        }
+
     </style>
 </head>
 <body>
@@ -159,20 +167,53 @@
         const imageUrl = 'https://th.bing.com/th/id/R.a339894d35b503f63cfc60b38a44c404?rik=6PllGXQIzb9g6g&pid=ImgRaw&r=0';
         const laughAudio = document.getElementById('laugh-sound');
 
+        // DANH SÁCH TÊN ANIME ĐÃ ĐƯỢC MỞ RỘNG
+        const animeNames = [
+            'gojo', 'satoru', 'nobara', 'deku', 'midoriya', 'izuku', 'bakugo', 'katsuki', 'todoroki', 
+            'shoto', 'luffy', 'zoro', 'nami', 'sanji', 'levi', 'eren', 'mikasa', 
+            'naruto', 'sasuke', 'sakura', 'nezuko', 'tanjiro', 'shinobu',
+            'rem', 'emilia', 'goku', 'vegeta', 'light', 'yagami', 'l', 'zero two', 'aot', 'mha', 
+            'itachi', 'kakashi', 'hinata', 'usopp', 'chopper', 'robin', 'broly', 'doraemon', 
+            'nobita', 'shizuka', 'killua', 'gon', 'kurapika', 'hisoka', 'anya', 'loid', 'yor',
+            'saitama', 'genos', 'subaru', 'reigen', 'mob'
+        ];
+
         function checkCrush() {
             const crushName = document.getElementById('crush-name').value.trim();
             const resultDiv = document.getElementById('result');
+            // Chuyển thành chữ thường, loại bỏ khoảng trắng và dấu (tùy chọn) để so sánh dễ hơn
+            const normalizedName = crushName.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/\s/g, ''); 
 
+            // 1. Kiểm tra điền tên
             if (crushName === '') {
                 const errorDiv = document.createElement('div');
                 errorDiv.className = 'result-no result-text';
-                errorDiv.innerHTML = "❌ **Bạn phải điền tên người bạn thích!**";
+                errorDiv.innerHTML = "Bạn phải điền tên người bạn thích!";
                 resultDiv.innerHTML = '';
                 resultDiv.appendChild(errorDiv);
                 return;
             }
 
-            // **PHÁT ÂM THANH TIẾNG CƯỜI** (Lệnh này chỉ hoạt động đáng tin cậy khi chạy qua Local Server)
+            // 2. KIỂM TRA TÊN ANIME
+            if (animeNames.includes(normalizedName)) {
+                // Hiển thị thông báo anime với emoji an ủi
+                const animeErrorDiv = document.createElement('div');
+                animeErrorDiv.className = 'result-anime result-text';
+                animeErrorDiv.innerHTML = `😇 Mày thực sự crush một đứa không có thật à? 😇`;
+                
+                resultDiv.innerHTML = '';
+                resultDiv.appendChild(animeErrorDiv);
+                
+                // Phát âm thanh khi có lỗi anime
+                laughAudio.currentTime = 0; 
+                laughAudio.play().catch(error => { console.log("Lỗi phát âm thanh."); });
+                return; // Ngừng thực hiện các bước tiếp theo
+            }
+
+
+            // 3. THỰC HIỆN LOGIC BÌNH THƯỜNG (nếu tên không phải anime)
+
+            // Phát âm thanh tiếng cười
             laughAudio.currentTime = 0; 
             laughAudio.play().catch(error => {
                 console.log("Không thể phát âm thanh. Hãy kiểm tra Live Server và đường dẫn tệp.");
@@ -193,16 +234,18 @@
             
             resultDiv.appendChild(imageElement);
 
-            // 2. Thuật toán 1%
+            // 4. Thuật toán 1%
             const isMatch = Math.random() < 0.01;
             let resultText = '';
             let resultClass = '';
 
             if (isMatch) {
                 resultClass = 'result-yes';
-                resultText = `🎉 **CÓ RỒI!** ${crushName} có thể cũng thích bạn đó! (Tỷ lệ 1% đã trúng!)`;
+                // Đã xóa emoji và in đậm
+                resultText = `CÓ RỒI! ${crushName} có thể cũng thích bạn đó! (Tỷ lệ 1% đã trúng!)`;
             } else {
                 resultClass = 'result-no';
+                // Đã xóa in đậm
                 resultText = `mày nghĩ cô/anh ấy yêu mày thật à?`;
             }
 
